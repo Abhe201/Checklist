@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Checklist Noida</title>
+    <!-- Include your external CSS link or styles here -->
+    <link rel="stylesheet" href="{% static 'checklist/checklist_style.css' %}">
+</head>
+<body>
+    <h1>Daily Checklist {{ location }}</h1>
+    <p><strong>Date: </strong> {{ current_date }}</p>
+
+
+    <!-- Display errors (if any) -->
+    {% if errors %}
+        <div class="error-messages" style="color: red;">
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- Add an id to the form so we can target it with JavaScript -->
+    <form method="POST" id="checklist-form">
+        {% csrf_token %}   
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Serial</th>
+                    <th>Category</th>
+                    <th>Service</th>
+                    <th>IP</th>
+                    <th>Frequency</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                    <tr>
+                        <!-- Table fields -->
+                        <td>{{ service.serial }}</td>
+                        <td>{{ service.category }}</td>
+                        <td>{{ service.name }}</td>
+                        <td>{{ service.ip }}</td>
+                        <td>{{ service.frequency }}</td>
+                        
+                        <!-- Dropdown field for status -->
+                        <td>
+                            <select name="status-{{ service.serial }}" class="status-dropdown">
+                                <option value="Yes" {% if service.status == 'Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if service.status == 'No' %}selected{% endif %}>No</option>
+                                <option value="N/A" {% if service.status == 'N/A' %}selected{% endif %}>N/A</option>
+                            </select>
+                        </td>
+                        
+                        <!-- Remarks field (disabled unless "No" is selected) -->
+                        <td>
+                            <input type="text" name="remarks-{{ service.serial }}" class="remarks-input" value="{{ service.remarks }}" {% if service.status != 'No' %}disabled{% endif %}>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <!-- Submit button with confirmation dialog -->
+        <button type="submit" class="center-button">Submit</button>
+    </form>
+
+    <!-- JavaScript for enabling/disabling remarks based on dropdown -->
+    <script>
+        // Function to toggle the remarks field based on the selected status
+        function toggleRemarks() {
+            const statusSelects = document.querySelectorAll('.status-dropdown');
+            const remarksInputs = document.querySelectorAll('.remarks-input');
+            
+            // Loop through each service row
+            statusSelects.forEach((statusSelect, index) => {
+                const remarksInput = remarksInputs[index];
+                
+                // If "No" is selected, enable the remarks input field
+                if (statusSelect.value === 'No') {
+                    remarksInput.disabled = false;
+                } else {
+                    remarksInput.disabled = true;
+                }
+            });
+        }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', toggleRemarks);
+
+        // Run when status is changed
+        const statusDropdowns = document.querySelectorAll('.status-dropdown');
+        statusDropdowns.forEach(dropdown => {
+            dropdown.addEventListener('change', toggleRemarks);
+        });
+    </script>
+
+    <!-- JavaScript for the confirmation dialog -->
+    <script>
+        // Add an event listener to the form's submit event
+        document.getElementById('checklist-form').addEventListener('submit', function(event) {
+            // Show confirmation popup
+            const isConfirmed = confirm("Are you sure you want to submit?");
+            
+            // If the user clicks "Cancel", prevent form submission
+            if (!isConfirmed) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
