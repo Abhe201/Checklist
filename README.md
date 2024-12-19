@@ -55,7 +55,7 @@ Follow these steps to install and run the project locally:
 ### **2. Clone the Repository**
 
 ```bash
-git clone https://github.com/your-username/daily-checklist.git
+git clone [https://github.com/Abhe201/Checklist.git]
 cd daily-checklist
 ```
 
