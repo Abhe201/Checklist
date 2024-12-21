@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Service, Profile
+from .models import Service, Profile ,ServiceRecord
 
 # Register Profile model to appear in the admin interface
 @admin.register(Profile)
@@ -7,6 +7,12 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'location')
     search_fields = ('user__username', 'location')
 
+
+@admin.register(ServiceRecord)
+class ServiceRecordAdmin(admin.ModelAdmin):
+    list_display = ('service', 'user', 'date', 'status', 'remarks')
+    search_fields = ('service__name', 'user__username', 'status', 'remarks')
+    list_filter = ('date', 'status')
 
 # Register the Service model to appear in the admin interface
 @admin.register(Service)

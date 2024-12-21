@@ -49,3 +49,13 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+    
+class ServiceRecord(models.Model):
+    service = models.ForeignKey('Service', on_delete=models.CASCADE, related_name='records')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Track who updated
+    date = models.DateField(auto_now_add=True)  # Automatically set the date when a record is created
+    status = models.CharField(max_length=10, choices=[('Yes', 'Yes'), ('No', 'No'), ('N/A', 'N/A')])
+    remarks = models.TextField(blank=True, null=True)  # Optional remarks
+
+    def __str__(self):
+        return f"{self.service.name} - {self.date} - {self.status}"
