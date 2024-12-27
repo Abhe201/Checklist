@@ -25,6 +25,7 @@
     {% endif %}
 
     <!-- Add an id to the form so we can target it with JavaScript -->
+    {% csrf_token %}
     <form method="POST" id="checklist-form">
         {% csrf_token %}   
 

@@ -2,40 +2,38 @@ from django.shortcuts import render , redirect
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .models import Service ,Profile,Location
+from .models import Service ,Profile,Location ,DailyRecord
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.db.models import Q
 # Create your views here.
 
 def custom_login_view(request):
     if request.method == 'POST':
-        # Use Django's AuthenticationForm for validating credentials
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
-            # Get the username and password from the form
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            
-            # Authenticate the user
-            user = authenticate(username=username, password=password)
-            
-            if user is not None:
-                # Log the user in
-                login(request, user)
-                return redirect('checklist')  # Redirect to the checklist page
-            else:
-                # Invalid credentials
-                return render(request, 'registration/login.html', {'form': form, 'error': 'Invalid credentials'})
-        else:
-            # Invalid form
-            return render(request, 'registration/login.html', {'form': form, 'error': 'Invalid form submission'})
-    else:
-        # Display the login page with an empty form
-        form = AuthenticationForm()
-        return render(request, 'registration/login.html', {'form': form})
 
+            # Authenticate user (case insensitive for username)
+            user = authenticate(username=username.lower(), password=password)
+            if user:
+                login(request, user)
+
+                # Redirect based on user type
+                if hasattr(user, 'profile') and user.profile.user_type == 'Admin':
+                    return redirect('records')  # Admin -> Report page
+                return redirect('checklist')  # Regular user -> Checklist page
+
+            return render(request, 'registration/login.html', {'form': form, 'error': 'Invalid credentials'})
+
+        return render(request, 'registration/login.html', {'form': form, 'error': 'Invalid form data'})
+
+    form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 
 # @login_required
@@ -94,4 +92,34 @@ def checklist_view(request):
         'services': services,
         'current_date': current_date,
         'location': profile.location,
+    })
+
+# @login_required
+def record_view(request):
+    # Check if the user is an Admin
+    if request.user.profile.user_type != "Admin":
+        return render(request, "checklist/error.html", {"error": "You do not have permission to view this page."})
+    
+    # Fetch date filter from the request (if provided)
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Fetch location filter from the request (if provided)
+    location_filter = request.GET.get('location')
+
+    # Get the DailyRecord queryset based on filters
+    records = DailyRecord.objects.all()
+
+    if start_date and end_date:
+        records = records.filter(date__range=[start_date, end_date])
+
+    if location_filter:
+        records = records.filter(location__name=location_filter)
+
+    # Pass the records to the template
+    return render(request, "checklist/report.html", {
+        "records": records,
+        "start_date": start_date,
+        "end_date": end_date,
+        "location_filter": location_filter,
     })

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service Records</title>
+</head>
+<body>
+    <h1>Service Records</h1>
+    
+    <!-- Filters for date and location -->
+    <form method="get">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+        
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" value="{{ location_filter }}">
+
+        <button type="submit">Filter</button>
+    </form>
+
+    <hr>
+
+    <!-- Display records -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Service Name</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Remarks</th>
+                <th>Date</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td>{{ record.service.name }}</td>
+                    <td>{{ record.location.name }}</td>  
+                    <td>{{ record.status }}</td>
+                    <td>{{ record.remarks }}</td>
+                    <td>{{ record.date }}</td>
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No records found for the selected filters.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

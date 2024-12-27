@@ -1,12 +1,17 @@
 from django.contrib import admin
-from .models import Service, Profile
+from .models import Service, Profile ,DailyRecord
 
 # Register Profile model to appear in the admin interface
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'location')
+    list_display = ('user', 'location','user_type')
     search_fields = ('user__username', 'location')
 
+@admin.register(DailyRecord)
+class DailyRecordAdmin(admin.ModelAdmin):
+    list_display = ('service', 'location', 'date', 'status', 'remarks')
+    search_fields = ('service__name', 'location__name', 'status', 'date')
+    list_filter = ('location', 'status', 'date')
 
 # Register the Service model to appear in the admin interface
 @admin.register(Service)

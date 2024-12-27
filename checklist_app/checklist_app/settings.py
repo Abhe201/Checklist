@@ -63,10 +63,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'checklist_app.urls'
 
 LOGOUT_REDIRECT_URL = 'login'  # Redirect to the login page after logout
 LOGIN_URL = 'login'  # URL name for the login page
+
 LOGIN_REDIRECT_URL = 'checklist'  # Redirect to checklist after login
 
 
